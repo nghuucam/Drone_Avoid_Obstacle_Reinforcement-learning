@@ -81,7 +81,7 @@ Download the Gym-pybullet-drones simulation environment
 
 ```bash
 git clone https://github.com/nghuucam/Drone_Avoid_Obstacle_Reinforcement-learning.git
-cd gym-pybullet-drones/
+cd Drone_Avoid_Obstacle_Reinforcement-learning/
 
 conda create -n drones python=3.10
 conda activate drones
