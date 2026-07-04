@@ -1,26 +1,86 @@
-> [!TIP]
-> For research work with **symbolic dynamics and constraints**, also try [`safe-control-gym`](https://github.com/learnsyslab/safe-control-gym)
->
-> For GPU-accelerated, **differentiable, JAX-based simulation**, also try [`crazyflow`](https://github.com/learnsyslab/crazyflow)
->
-> For production-grade deployment of **ROS2 + PX4/ArduPilot + YOLO/LiDAR**, use [`aerial-autonomy-stack`](https://github.com/JacopoPan/aerial-autonomy-stack)
+# 🚁 Project: Training a Drone for Obstacle Avoidance using Reinforcement Learning (RL)
 
-# gym-pybullet-drones
+## 📑 TABLE OF CONTENTS
 
-This is a minimalist refactoring of the original `gym-pybullet-drones` repository, designed for compatibility with [`gymnasium`](https://github.com/Farama-Foundation/Gymnasium), [`stable-baselines3` 2.0](https://github.com/DLR-RM/stable-baselines3/pull/1327), and [`betaflight`](https://github.com/betaflight/betaflight)/[`crazyflie-firmware`](https://github.com/bitcraze/crazyflie-firmware/) SITL.
+* [Course Introduction](#gioithieumonhoc)
+* [Instructor](#giangvien)
+* [Team Members](#thanhvien)
+* [Project Overview](#doan)
+* [Technologies & Algorithms](#congnghe)
+* [Simulation Environment](#moitruong)
+* [Results & Evaluation](#ketqua)
+* [Installation & Deployment](#caidat)
 
-> **NEWS**: `gym-pybullet-drones` was featured in [GitHub's Maintainer Spotlight 2026](https://maintainermonth.github.com/academia/gym-pybullet-drones-maintainer-spotlight)
+## 🎓 COURSE INTRODUCTION <a name="gioithieumonhoc"></a>
 
-> **NOTE**: if you want to access the original codebase, presented at IROS in 2021, please `git checkout [paper|master]`
+* **Course Name:** Specialized Project
+* **Course Code:** NT114
+* **Class:** NT114.Q21
 
-<img src="gym_pybullet_drones/assets/helix.gif" alt="formation flight" width="325"> <img src="gym_pybullet_drones/assets/helix.png" alt="control info" width="425">
+## 👨‍🏫 INSTRUCTOR <a name="giangvien"></a>
 
-## Installation
+* MSc. **Nguyễn Khánh Thuật**
 
-Tested on Intel x64/Ubuntu 22.04 and Apple Silicon/macOS 26.2.
+## 👨‍💻 TEAM MEMBERS <a name="thanhvien"></a>
 
-```sh
-git clone https://github.com/learnsyslab/gym-pybullet-drones.git
+| No. | Student ID | Full Name | Github | Email | 
+| :---: | :---: | :--- | :--- | :--- | 
+| 1 | 23520164 | Nguyễn Hữu Cảm | [nghuucam](https://github.com/nghuucam) | 23520164@gm.uit.edu.vn | 
+
+## 🚀 PROJECT OVERVIEW <a name="doan"></a>
+
+**Project Title:** Training a Drone for Obstacle Avoidance based on Reinforcement Learning.
+
+**Problem Description:**
+This project aims to build an autonomous system for a Drone in a 3D simulation environment. In this environment, obstacles (cylindrical blocks) are generated at random positions in each episode. The Drone's task is to use its "vision" and "sensors" to find the shortest flight path to the destination safely without colliding.
+
+The project implements, optimizes, and compares the performance of two advanced Deep Reinforcement Learning algorithms:
+
+1. **DQN** (Deep Q-Network)
+2. **D3QN** (Dueling Double Deep Q-Network)
+
+## 🛠 TECHNOLOGIES & ALGORITHMS <a name="congnghe"></a>
+
+* **Programming Language:** Python
+* **Deep Learning Framework:** PyTorch
+* **Data & Image Processing Libraries:** NumPy, OpenCV, Pandas, Matplotlib
+* **Optimization Techniques (Applied):**
+  * **Sensor Fusion:** Combining spatial images and 4 virtual Lidar rays (Raycast) to eliminate blind spots.
+  * **Soft Target Update:** Continuously updating the Target network weights at a small rate (0.5% per step) to prevent Gradient shock and thoroughly resolve the "Q-Value Overestimation" issue of D3QN.
+  * **Epsilon Decay:** Gradually decreasing the random exploration rate over episodes.
+
+## 🌍 SIMULATION ENVIRONMENT <a name="moitruong"></a>
+
+The system uses the **`gym-pybullet-drones`** framework (realistic physics simulation of Drones).
+
+* **State Space (21 dimensions):** Includes Coordinates (X, Y, Z), Rotation Angles (Roll, Pitch, Yaw), Velocity, Angular Velocity, Action Hints, and Data from 4 Lidar sensor rays.
+* **Action Space (5 Discrete):** Move Forward, Move Left, Move Right, Move Diagonally Left, Move Diagonally Right.
+* **Reward System:**
+  * Reaching the destination: `+1000` points.
+  * Colliding with an obstacle / Flying out of bounds / Running out of time: `-100` to `-200` points.
+  * Movement reward: Based on the distance moving closer to the destination.
+
+## 📊 RESULTS & EVALUATION <a name="ketqua"></a>
+
+Based on the training results (1000 episodes) and testing (100 test episodes per algorithm):
+
+* **DQN Algorithm:** Demonstrates fast convergence speed, learns how to survive well in the early episodes, and achieves a highly positive success rate of reaching the target in a dynamic environment.
+* **D3QN Algorithm:** Excels in stability during the later stages. Thanks to the Dueling architecture that separates State Value and Action Advantage, combined with Soft Update, D3QN makes smoother and safer obstacle-avoidance decisions.
+
+## 💻 INSTALLATION & DEPLOYMENT <a name="caidat"></a>
+
+### System Requirements
+
+* Python 3.8+
+* Virtual environment (Conda / Venv) recommended.
+
+### Installation Steps
+
+**1. Initialize Environment:** 
+Download the Gym-pybullet-drones simulation environment
+
+```bash
+git clone https://github.com/nghuucam/Drone_Avoid_Obstacle_Reinforcement-learning.git
 cd gym-pybullet-drones/
 
 conda create -n drones python=3.10
@@ -28,117 +88,177 @@ conda activate drones
 
 pip3 install -e . # if needed, `sudo apt install build-essential` to install `gcc` and build `pybullet`
 
-# check installed packages with `conda list`, deactivate with `conda deactivate`, remove with `conda remove -n drones --all`
+# check installed packages with `conda list`, deactivate with `conda deactivate`, remove with `conda env remove -n drones`
 ```
 
-## Use
 
-### PID control examples
+**2. Training the Models**
 
-```sh
-cd gym_pybullet_drones/examples/
-python3 pid.py # position and velocity reference
-python3 pid_velocity.py # desired velocity reference
+For the DQN algorithm:
+```bash
+cd DQN
+python train.py
+
 ```
 
-### Downwash effect example
+For the D3QN algorithm:
 
-```sh
-cd gym_pybullet_drones/examples/
-python3 downwash.py
+```bash
+cd D3QN
+python train.py
+
 ```
 
-### Reinforcement learning examples (SB3's PPO)
+*After the training is complete, three `.xlsx` log files and the trained model weights will be generated and saved in the `Model` directory.*
 
-```sh
-cd gym_pybullet_drones/examples/
-python learn.py # task: single drone hover at z == 1.0
-python learn.py --multiagent true # task: 2-drone hover at z == 1.2 and 0.7
+**3. Results Evaluation**
 
-LATEST_MODEL=$(ls -t results | head -n 1) && python play.py --model_path "results/${LATEST_MODEL}/best_model.zip" # play and visualize the most recent learned policy after training
+**3.1. Training Analysis**
+
+Copy the three `.xlsx` files generated during training and paste them into the respective `Analyze/DQN` or `Analyze/D3QN` folders. Then, run the following commands to generate the analysis charts:
+
+For DQN:
+
+```bash
+cd Analyze/DQN
+python ana1.py
+python ana2.py
+python ana3.py
+python ana4.py
+python ana5.py
+
 ```
 
-<img src="gym_pybullet_drones/assets/rl.gif" alt="rl example" width="375"> <img src="gym_pybullet_drones/assets/marl.gif" alt="marl example" width="375">
+For D3QN:
 
-### Run all tests
+```bash
+cd Analyze/D3QN
+python ana1.py
+python ana2.py
+python ana3.py
+python ana4.py
+python ana5.py
 
-```sh
-# from the repo's top folder
-cd gym-pybullet-drones/
-pytest tests/
 ```
 
-### Betaflight SITL example (Ubuntu only)
+**Chart Descriptions:**
 
-```sh
-git clone https://github.com/betaflight/betaflight 
-cd betaflight/
-git checkout cafe727 # `master` branch head at the time of writing (future release 4.5)
-make arm_sdk_install # if needed, `apt install curl``
-make TARGET=SITL # comment out line: https://github.com/betaflight/betaflight/blob/master/src/main/main.c#L52
-cp ~/gym-pybullet-drones/gym_pybullet_drones/assets/eeprom.bin ~/betaflight/ # assuming both gym-pybullet-drones/ and betaflight/ were cloned in ~/
-betaflight/obj/main/betaflight_SITL.elf
+* **Chart 1 (`ana1.py`):** Overall test results analysis.
+* **Chart 2 (`ana2.py`):** Analysis of Q-Value, Epsilon decay, and Action distribution.
+* **Chart 3 (`ana3.py`):** Evaluation of Accumulated Reward and Win Rate.
+* **Chart 4 (`ana4.py`):** Tracking the model's Loss.
+* **Chart 5 (`ana5.py`):** Assessment of survival capability based on Reward and Step count.
+
+**3.2. Testing in a Randomized Environment**
+
+You can evaluate the trained models by running test scenarios in an environment with randomly generated obstacles.
+
+*(**Note:** Before running the test, please update line 160 in the `test.py` script to point to the exact path of your trained model file).*
+
+Testing the DQN model:
+
+```bash
+cd Test/DQN
+python test.py
+
 ```
 
-In another terminal, run the example
+Testing the D3QN model:
 
-```sh
-conda activate drones
-cd gym_pybullet_drones/examples/
-python3 beta.py --num_drones 1 # check the steps in the file's docstrings to use multiple drones
+```bash
+cd Test/D3QN
+python test.py
+
 ```
 
-### `pycffirmware` Python Bindings example (multiplatform, single-drone)
 
-First, install [`pycffirmware`](https://github.com/learnsyslab/pycffirmware?tab=readme-ov-file#installation) for Ubuntu, macOS, or Windows, then
 
-```sh
-cd gym_pybullet_drones/examples/
-python3 cf.py
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- ///**2. Chạy thử các thuật toán**
+DQN
+```bash
+cd DQN
+python train.py
 ```
 
-## Citation
-
-If you wish, please cite our [IROS 2021 paper](https://arxiv.org/abs/2103.02142) ([and original codebase](https://github.com/learnsyslab/gym-pybullet-drones/tree/paper)) as
-
-```bibtex
-@INPROCEEDINGS{panerati2021learning,
-      title={Learning to Fly---a Gym Environment with PyBullet Physics for Reinforcement Learning of Multi-agent Quadcopter Control}, 
-      author={Jacopo Panerati and Hehui Zheng and SiQi Zhou and James Xu and Amanda Prorok and Angela P. Schoellig},
-      booktitle={2021 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
-      year={2021},
-      volume={},
-      number={},
-      pages={7512-7519},
-      doi={10.1109/IROS51168.2021.9635857}
-}
+D3QN
+```bash
+cd D3QN
+python train.py
 ```
 
-## References
+Sau thực hiện việc huấn luyện, chúng ta sẽ nhận được 3 file .xlsx và các file Model được lưu trong thư mục Model
 
-- Erwin Coumans and Yunfei Bai (2023) [*PyBullet Quickstart Guide*](https://docs.google.com/document/d/10sXEhzFRSnvFcl3XxNGhnD4N2SedqwdAvK3dsihxVUA/edit?tab=t.0#heading=h.2ye70wns7io3)
-- Carlos Luis and Jeroome Le Ny (2016) [*Design of a Trajectory Tracking Controller for a Nanoquadcopter*](https://arxiv.org/pdf/1608.05786.pdf)
-- Nathan Michael, Daniel Mellinger, Quentin Lindsey, Vijay Kumar (2010) [*The GRASP Multiple Micro-UAV Testbed*](https://ieeexplore.ieee.org/document/5569026)
-- Benoit Landry (2014) [*Planning and Control for Quadrotor Flight through Cluttered Environments*](http://groups.csail.mit.edu/robotics-center/public_papers/Landry15)
-- Julian Forster (2015) [*System Identification of the Crazyflie 2.0 Nano Quadrocopter*](https://www.research-collection.ethz.ch/handle/20.500.11850/214143)
-- Antonin Raffin, Ashley Hill, Maximilian Ernestus, Adam Gleave, Anssi Kanervisto, and Noah Dormann (2019) [*Stable Baselines3*](https://github.com/DLR-RM/stable-baselines3)
-- Guanya Shi, Xichen Shi, Michael O’Connell, Rose Yu, Kamyar Azizzadenesheli, Animashree Anandkumar, Yisong Yue, and Soon-Jo Chung (2019)
-[*Neural Lander: Stable Drone Landing Control Using Learned Dynamics*](https://arxiv.org/pdf/1811.08027.pdf)
-- C. Karen Liu and Dan Negrut (2020) [*The Role of Physics-Based Simulators in Robotics*](https://www.annualreviews.org/doi/pdf/10.1146/annurev-control-072220-093055)
-- Yunlong Song, Selim Naji, Elia Kaufmann, Antonio Loquercio, and Davide Scaramuzza (2020) [*Flightmare: A Flexible Quadrotor Simulator*](https://arxiv.org/pdf/2009.00563.pdf)
+**3. Đánh giá các kết quả**
+**3.1. Đánh giá quá trình huấn luyện**
+Thực hiện copy 3 file .xlsx sau quá trình huấn luyện, paste vào folder Analyze với các thư mục DQN/D3QN sau đó chạy các câu lệnh sau để phân tích
+Đổi với DQN
 
------
-> UTIAS / [Learning Systems and Robotics Lab](https://github.com/learnsyslab) / [Vector Institute](https://github.com/VectorInstitute) / University of Cambridge's [Prorok Lab](https://github.com/proroklab)
+```bash
+cd Analyze/DQN
+python ana1.py
+python ana2.py
+python ana3.py
+python ana4.py
+python ana5.py
+```
 
-<!--
-## WIP/Desired Contributions/PRs
+Đối với D3QN
+```bash
+cd Analyze/D3QN
+python ana1.py
+python ana2.py
+python ana3.py
+python ana4.py
+python ana5.py
+```
 
-- [ ] Multi-drone `crazyflie-firmware` SITL support
-- [ ] Use SITL services with steppable simulation
-- [ ] Add motor delay, advanced ESC modeling by implementing a buffer in `BaseAviary._dynamics()`
-- [ ] Replace `rpy` with quaternions (and `ang_vel` with body rates) by editing `BaseAviary._updateAndStoreKinematicInformation()`, `BaseAviary._getDroneStateVector()`, and the `.computeObs()` methods of relevant subclasses
+Ý nghĩa của các biểu đồ:
+- Biểu đồ 1: Phân tích kết quả kiểm thử tổng quan
+- Biểu đồ 2: Phân tích Q-Value, Epsilon và Hành động
+- Biểu đồ 3: Đánh giá Điểm thưởng và Tỷ lệ chiến thắng
+- Biểu đồ 4: Theo dõi mức độ lỗi của mô hình - Loss
+- Biểu đồ 5: Đánh giá Khả năng sinh tồn qua Điểm số và Số bước
 
-## Troubleshooting
+**3.2. Kiểm thử trong môi trường ngẫu nhiên**
+Với các file Model đã có sau khi huấn luyện thì có thể thực hiện sử dụng các bài kiểm thử trong môi trường có vật cản được sinh ngẫu nhiên để đánh giá được mô hình. Đoạn code cần thay đổi các trường ở trong dòng thứ 160 để có đường dẫn mô hình.
 
-- On Ubuntu, with an NVIDIA card, if you receive a "Failed to create and OpenGL context" message, launch `nvidia-settings` and under "PRIME Profiles" select "NVIDIA (Performance Mode)", reboot and try again.
--->
+Kiểm thử mô hình với thuật toán DQN
+```bash
+cd Test/DQN
+python test.py
+```
+
+Kiểm thử mô hình với thuật toán D3QN
+```bash
+cd Test/D3QN
+python test.py
+```
+///-->
