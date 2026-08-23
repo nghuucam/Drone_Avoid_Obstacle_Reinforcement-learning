@@ -86,7 +86,7 @@ cd Drone_Avoid_Obstacle_Reinforcement-learning/
 conda create -n drones python=3.11
 conda activate drones
 
-# You must install ** Microsoft C++ Build Tools with ** Desktop development with C++
+# You must install Microsoft C++ Build Tools with Desktop development with C++
 pip3 install -e . # if needed, `sudo apt install build-essential` to install `gcc` and build `pybullet`
 
 # check installed packages with `conda list`, deactivate with `conda deactivate`, remove with `conda env remove -n drones`
