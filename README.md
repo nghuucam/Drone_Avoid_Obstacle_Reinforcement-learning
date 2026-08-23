@@ -88,6 +88,7 @@ conda activate drones
 
 # You must install Microsoft C++ Build Tools with Desktop development with C++
 pip3 install -e . # if needed, `sudo apt install build-essential` to install `gcc` and build `pybullet`
+pip install -r requirements.txt
 
 # check installed packages with `conda list`, deactivate with `conda deactivate`, remove with `conda env remove -n drones`
 ```
