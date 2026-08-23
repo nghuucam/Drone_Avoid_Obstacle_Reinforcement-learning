@@ -1,5 +1,10 @@
 import os
+import sys
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.append(parent_dir)
 
 import numpy as np
 import time
@@ -10,8 +15,8 @@ import matplotlib.pyplot as plt
 
 from gym_pybullet_drones.utils.enums import DroneModel
 from gym_pybullet_drones.control.DSLPIDControl import DSLPIDControl
-from gym_pybullet_drones.My_Coding.D3QN.new_env import DroneEnv 
-from gym_pybullet_drones.My_Coding.D3QN.agent import D3QN, DroneNet
+from new_env import DroneEnv 
+from agent import D3QN, DroneNet
 
 def get_action_hints(obs, env, direct):
     state = obs[0:3]
