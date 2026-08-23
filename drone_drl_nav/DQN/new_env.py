@@ -1,8 +1,16 @@
+import os
+import sys
+os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+sys.path.append(parent_dir)
+
 from gymnasium import spaces
 from gym_pybullet_drones.envs.BaseAviary import BaseAviary
 from gym_pybullet_drones.utils.enums import DroneModel, Physics, ActionType, ObservationType, ImageType
-from gym_pybullet_drones.My_Coding import config
 
+import config
 import pybullet_data
 import numpy as np
 import pybullet as p

@@ -34,4 +34,4 @@ def analyze_flight_log(csv_file):
 
 if __name__ == "__main__":
     print("\n--- ĐÁNH GIÁ MÔ HÌNH DQN ---")
-    analyze_flight_log('drone_flight_log_test_DQN.csv')
+    analyze_flight_log('drone_flight_log_test_D3QN.csv')
