@@ -10,6 +10,7 @@
 * [Simulation Environment](#moitruong)
 * [Results & Evaluation](#ketqua)
 * [Installation & Deployment](#caidat)
+* [Training Results Comparison (DQN vs. D3QN)](#sosanh)
 
 ## 🎓 COURSE INTRODUCTION <a name="gioithieumonhoc"></a>
 
@@ -62,7 +63,7 @@ The system uses the **`gym-pybullet-drones`** framework (realistic physics simul
 
 ## 📊 RESULTS & EVALUATION <a name="ketqua"></a>
 
-Based on the training results (1000 episodes) and testing (100 test episodes per algorithm):
+Based on the training results (500 episodes) and testing (100 test episodes per algorithm):
 
 * **DQN Algorithm:** Demonstrates fast convergence speed, learns how to survive well in the early episodes, and achieves a highly positive success rate of reaching the target in a dynamic environment.
 * **D3QN Algorithm:** Excels in stability during the later stages. Thanks to the Dueling architecture that separates State Value and Action Advantage, combined with Soft Update, D3QN makes smoother and safer obstacle-avoidance decisions.
@@ -173,35 +174,80 @@ python test.py
 
 ```
 
+---
 
+## 📈 TRAINING RESULTS COMPARISON: DQN vs. D3QN <a name="sosanh"></a>
 
+Both **DQN** and **D3QN** were trained over **500 episodes** under identical 3D obstacle-avoidance simulation conditions (`gym-pybullet-drones`). Below is a detailed side-by-side comparison across four core evaluation metrics.
 
+### 1. Summary Comparison Table
 
+| Evaluation Metric | DQN | D3QN | Comparison & Key Takeaway |
+| :--- | :---: | :---: | :--- |
+| **Zero-Reward Crossing Point** *(100-ep MA)* | ~Episode 205 | **~Episode 180** | **D3QN** learns positive-reward trajectories faster. |
+| **Peak Accumulated Reward** *(100-ep MA)* | ~395 pts *(Ep 408)* | **~475 pts** *(Ep 435)* | **D3QN** achieves a **~20% higher** peak moving-average score. |
+| **Final Accumulated Reward** *(Ep 500, 100-ep MA)* | ~335 pts | **~415 pts** | **D3QN** maintains higher and more consistent rewards at convergence. |
+| **Peak Win Rate** *(100-ep MA)* | ~81% *(Ep 408)* | **~92%** *(Ep 435)* | **D3QN** outperforms DQN by **+11%** in peak success rate. |
+| **Final Win Rate** *(Ep 400–500 range)* | 72% – 81% | **83% – 92%** | **D3QN** demonstrates superior reliability in the late stage. |
+| **Average Flight Steps** *(Converged)* | ~30 – 33 steps | **~30 – 32 steps** | Both converge to optimal path lengths; **D3QN** has fewer crash drops. |
+| **Early Training Loss Peak** *(20-ep MA)* | ~15.8 *(spike: 21.8)* | **~13.7** *(spike: 18.6)* | **D3QN** suppresses early gradient shock and Q-value overestimation. |
 
+---
 
+### 2. Accumulated Reward & Win Rate
 
+| DQN | D3QN |
+| :---: | :---: |
+| ![DQN Accumulated Reward vs Win Rate](img/DQN%20_%20Accumulated%20Reward%20vs%20Win%20Rate.png) | ![D3QN Accumulated Reward vs Win Rate](img/D3QN%20Accumulated%20Reward%20vs%20Win%20Rate.png) |
 
+* **DQN:** Starts recording wins around Episode 40 and steadily improves after Episode 100. Its 100-episode moving average reward crosses `0` at Episode ~205 and peaks at **~395 points** (with an **~81% Win Rate**) around Episode 408, before fluctuating between **72%–77%** near Episode 500.
+* **D3QN:** Begins winning earlier (around Episode 30) and crosses the `0` reward threshold faster (at Episode ~180). In the late stage (Episodes 370–500), D3QN reaches a peak moving-average reward of **~475 points** and a **Win Rate of ~92%**, sustaining **83%–92%** until the end of training with noticeably fewer failed episodes (grey drop lines).
 
+---
 
+### 3. Survival Capability & Path Optimization (Reward vs. Average Steps)
 
+| DQN | D3QN |
+| :---: | :---: |
+| ![DQN Accumulated Reward vs Average Step](img/DQN%20_%20Accumulated%20Reward%20vs%20Average%20Step.png) | ![D3QN Accumulated Reward vs Average Step](img/D3QN%20_%20Accumulated%20Reward%20vs%20Average%20Step.png) |
 
+* **DQN:** During the initial exploration phase, the average step count drops to **~12 steps** due to frequent early collisions. As the agent learns obstacle avoidance, flight duration gradually rises and stabilizes around **30–33 steps** per episode after Episode 300.
+* **D3QN:** Reaches the optimal **~30 steps** plateau much earlier (by Episode 220) and maintains a remarkably flat step curve (**30–32 steps**) through Episode 500. The raw step trace (light red) in D3QN exhibits significantly fewer sudden downward spikes in the final 150 episodes, confirming safer flight trajectories.
 
+---
 
+### 4. Exploration (Epsilon), Q-Value Estimation & Action Distribution
 
+| DQN | D3QN |
+| :---: | :---: |
+| ![DQN Epsilon vs Q-Values vs Action Distribution](img/DQN%20_%20Epsilon%20Delay%20vs%20Q-Values%20vs%20Action%20Distribution.png) | ![D3QN Epsilon vs Q-Values vs Action Distribution](img/D3QN%20_%20Epsilon%20Delay%20vs%20Q-Values%20vs%20Action%20Distribution.png) |
 
+* **Epsilon Decay & Q-Value Trend:** Both algorithms decay $\epsilon$ linearly from `1.0` down to `0.1` at Episode 200.
+  * **DQN** exhibits a rapid Q-value surge up to **~17.2** around Episode 265 accompanied by high episode-to-episode variance (raw spikes reaching `~21`), then plateaus around `15.5–16.0`.
+  * **D3QN** controls overestimation during the transition from exploration to exploitation (staying stable at `14.5–16.0` between Episodes 200–400 with tighter variance) and smoothly scales up to **~19.2** by Episode 500 as its policy locks onto high-return paths.
+* **Action Distribution:**
+  * Both agents prioritize forward-advancing maneuvers (**Move Diagonally Right**, **Move Diagonally Left**, and **Move Forward**) over pure sideways movements (**Move Left**, **Move Right**), enabling the drone to dodge cylindrical obstacles while continuously closing the distance to the goal.
+  * **D3QN** shows an even stronger preference for diagonal evasive maneuvers (**>4,200 selections** each for *Move Diagonally Left* and *Move Diagonally Right* vs. **~3,850** in DQN), resulting in smoother obstacle-bypassing curves instead of abrupt lateral turns.
 
+---
 
+### 5. Training Loss Stability
 
+| DQN | D3QN |
+| :---: | :---: |
+| ![DQN Loss](img/DQN%20_%20Loss.png) | ![D3QN Loss](img/D3QN%20_%20Loss.png) |
 
+* **DQN:** Experiences a sharp initial Loss spike during Episodes 25–50, where the 20-episode moving average hits **~15.8** (and raw episode loss spikes up to **~21.8**) due to target instability and Q-value overestimation in standard DQN, before settling around `10.0–12.5`.
+* **D3QN:** By decoupling action selection from evaluation (**Double DQN**) and separating State Value $V(s)$ from Action Advantage $A(s, a)$ (**Dueling Architecture**), D3QN dampens the initial gradient shock—keeping the early moving-average Loss peak down to **~13.7**—and maintains a steady, controlled loss curve throughout the 500 episodes.
 
+---
 
+### 🏆 Overall Conclusion
 
-
-
-
-
-
-
+While **DQN** converges quickly and achieves a solid success rate (**~72%–81%**), **D3QN** proves superior across all evaluation criteria in dynamic 3D obstacle avoidance:
+1. **Higher Success Rate & Reward:** Reaches up to **92% Win Rate** and **~475 average reward** (vs. 81% and ~395 for DQN).
+2. **Smarter Navigation Strategy:** Strongly favors diagonal evasive trajectories, maintaining a steady **~30–32 steps** to reach the target with minimal collision drops.
+3. **Greater Training Stability:** Mitigates Q-value overestimation and reduces early-stage Loss spikes.
 
 <!-- ///**2. Chạy thử các thuật toán**
 DQN
